@@ -1,18 +1,47 @@
-// Serves a set of questions as a form, writes the answers to a file on submit,
-// then exits. Usage: node ask-in-browser.mjs <questions.json> <answers.json> [port]
+// Serves a set of questions as a form, prints the answers on submit, then
+// exits. Usage: node ask-in-browser.mjs [port] < questions.json
 import { execFile } from "node:child_process";
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { createServer } from "node:http";
 
-const [roundPath, answersPath, port = "4517"] = process.argv.slice(2);
-const round = JSON.parse(readFileSync(roundPath, "utf8"));
+const [port = "4517"] = process.argv.slice(2);
+const input = JSON.parse(readFileSync(0, "utf8"));
+
+// Questions arrive as plain text with backticks and **bold**. Ids, option
+// letters and the subtitle are filled in here so the caller never writes them.
+const md = (s) =>
+  s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+const count = input.questions.length;
+const round = {
+  title: md(input.title),
+  subtitle: `${count} question${count === 1 ? "" : "s"}. Change only the ones you disagree with, then send.`,
+  facts: input.facts?.map(md),
+  questions: input.questions.map((q, i) => ({
+    id: `Q${i + 1}`,
+    group: q.group && md(q.group),
+    title: md(q.q),
+    body: q.body && md(q.body),
+    multi: Array.isArray(q.rec),
+    recommended: [].concat(q.rec ?? []),
+    options: q.options.map((o, j) => {
+      const key = String.fromCharCode(65 + j);
+      return { key, label: `<b>${key}.</b> ${md(o)}` };
+    }),
+    why: q.why && md(q.why),
+  })),
+};
 
 const page = `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>${round.title}</title>
+<title>${round.title.replace(/<[^>]+>/g, "")}</title>
 <style>
   :root { color-scheme: light dark; --bg: #fafaf9; --card: #fff; --ink: #1c1917; --mute: #78716c; --line: #e7e5e4; --acc: #047857; --accbg: #ecfdf5; }
   @media (prefers-color-scheme: dark) { :root { --bg: #1c1917; --card: #292524; --ink: #f5f5f4; --mute: #a8a29e; --line: #44403c; --acc: #34d399; --accbg: #064e3b; } }
@@ -59,11 +88,11 @@ const form = document.getElementById("form");
 if (round.facts) form.append(el("ul", { className: "facts" }, round.facts.map((f) => "<li>" + f + "</li>").join("")));
 let group;
 for (const q of round.questions) {
-  if (q.group !== group) { group = q.group; form.append(el("h2", {}, group)); }
+  if (q.group && q.group !== group) { group = q.group; form.append(el("h2", {}, group)); }
   const fs = el("fieldset");
   fs.append(el("legend", {}, "<span>" + q.id + "</span>" + q.title));
   if (q.body) fs.append(el("p", { className: "body" }, q.body));
-  const rec = [].concat(q.recommended);
+  const rec = q.recommended;
   for (const o of q.options) {
     const label = el("label", { className: "opt" });
     const input = el("input", { type: q.multi ? "checkbox" : "radio", name: q.id, value: o.key, checked: rec.includes(o.key) });
@@ -77,9 +106,7 @@ for (const q of round.questions) {
 function answers() {
   return round.questions.map((q) => ({
     id: q.id,
-    title: q.title.replace(/<[^>]+>/g, ""),
     answer: [...document.querySelectorAll('input[name="' + q.id + '"]:checked')].map((i) => i.value),
-    recommended: [].concat(q.recommended),
     note: document.querySelector('textarea[name="' + q.id + '-note"]').value.trim(),
   }));
 }
@@ -88,7 +115,7 @@ const status = document.getElementById("status");
 document.getElementById("copy").onclick = async () => { await navigator.clipboard.writeText(asText()); status.textContent = "Copied. Paste it into the terminal."; };
 document.getElementById("send").onclick = async () => {
   try {
-    const res = await fetch("/submit", { method: "POST", body: JSON.stringify(answers()) });
+    const res = await fetch("/submit", { method: "POST", body: asText() });
     if (!res.ok) throw new Error();
     status.textContent = "Sent. You can close this tab.";
     document.getElementById("send").disabled = true;
@@ -106,9 +133,8 @@ const server = createServer((req, res) => {
     let body = "";
     req.on("data", (chunk) => (body += chunk));
     req.on("end", () => {
-      writeFileSync(answersPath, JSON.stringify(JSON.parse(body), null, 2));
       res.end("ok");
-      console.log(`Answers written to ${answersPath}`);
+      console.log(body);
       server.close();
       setTimeout(() => process.exit(0), 200);
     });
