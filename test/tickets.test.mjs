@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, it } from "node:test";
 import {
+  nextLine,
   nextTicket,
   openTable,
   readTickets,
@@ -269,5 +270,32 @@ describe("the table of open tickets", () => {
       "No open tickets.",
     );
     assert.strictEqual(openTable(readTickets(root)), "No open tickets.");
+  });
+});
+
+describe("the line for the next ticket", () => {
+  it("names the ticket and its file, in the feature asked for when one is", () => {
+    const tickets = ticketsOf(
+      ["a", "01", "ready-for-agent", "02 (Ticket 02 of a)"],
+      ["a", "02", "needs-triage", NONE],
+      ["a", "03", "ready-for-agent", NONE],
+      ["b", "01", "ready-for-agent", NONE],
+    );
+
+    assert.strictEqual(
+      nextLine(tickets),
+      "a 03: Ticket 03 of a (.scratch/a/issues/03-a-ticket.md)",
+    );
+    assert.strictEqual(
+      nextLine(tickets, "b"),
+      "b 01: Ticket 01 of b (.scratch/b/issues/01-a-ticket.md)",
+    );
+  });
+
+  it("says no ticket is ready when none is, and when there is no such feature", () => {
+    const tickets = ticketsOf(["a", "01", "needs-triage", NONE]);
+
+    assert.strictEqual(nextLine(tickets), "No ticket is ready.");
+    assert.strictEqual(nextLine(tickets, "c"), "No ticket is ready.");
   });
 });

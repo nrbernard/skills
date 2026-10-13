@@ -145,3 +145,12 @@ export function openTable(tickets) {
     .map((row) => `|${(blocked ? row : row.slice(0, -1)).join("|")}|`)
     .join("\n");
 }
+
+// One line naming the next ticket and the file it is in, which is all an agent
+// needs to go and read it, or one line saying no ticket is ready.
+/** @type {(tickets: Ticket[], feature?: string) => string} */
+export function nextLine(tickets, feature) {
+  const t = nextTicket(tickets, feature);
+  if (!t) return "No ticket is ready.";
+  return `${t.feature} ${t.number}: ${t.name} (${t.path})`;
+}
