@@ -5,6 +5,7 @@ Agent skills, one folder each under `skills/`.
 | Skill | What it does |
 | --- | --- |
 | [`ask-in-browser`](skills/ask-in-browser/SKILL.md) | Asks any question that is a choice between options as a browser form, with the recommended answers preselected. Needs Node and macOS (`open`). |
+| [`tickets`](skills/tickets/SKILL.md) | `/tickets` prints a table of every open ticket under `.scratch/<feature>/issues/`, with its number, name, status and open blockers. Needs Node and Claude Code. |
 
 ## Install
 
