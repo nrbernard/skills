@@ -3,7 +3,11 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, it } from "node:test";
-import { nextTicket, readTickets } from "../skills/tickets/tickets.mjs";
+import {
+  nextTicket,
+  openTable,
+  readTickets,
+} from "../skills/tickets/tickets.mjs";
 
 /** @import { Ticket } from "../skills/tickets/tickets.mjs" */
 
@@ -210,5 +214,60 @@ describe("a Blocked by line that names no ticket, or cannot be read", () => {
     );
 
     assert.deepStrictEqual(faultsOf(tickets), []);
+  });
+});
+
+describe("the table of open tickets", () => {
+  it("names a feature on its first row only, and leaves out done and wontfix tickets as rows and done ones as blockers", () => {
+    const tickets = ticketsOf(
+      [
+        "a",
+        "01",
+        "ready-for-agent",
+        "02 (Ticket 02 of a), 03 (Ticket 03 of a)",
+      ],
+      ["a", "02", "done", NONE],
+      ["a", "03", "wontfix", NONE],
+      ["a", "04", "needs-triage", NONE],
+      ["b", "01", "needs-triage", "a-04 (Ticket 04 of a)"],
+    );
+
+    assert.strictEqual(
+      openTable(tickets),
+      [
+        "|Feature|#|Name|Status|Blocked by|",
+        "|---|---|---|---|---|",
+        "|a|01|Ticket 01 of a|ready-for-agent|03|",
+        "||04|Ticket 04 of a|needs-triage||",
+        "|b|01|Ticket 01 of b|needs-triage|a-04|",
+      ].join("\n"),
+    );
+  });
+
+  it("has no Blocked by column when no open ticket has an open blocker", () => {
+    const tickets = ticketsOf(
+      ["a", "01", "ready-for-agent", "02 (Ticket 02 of a)"],
+      ["a", "02", "done", NONE],
+    );
+
+    assert.strictEqual(
+      openTable(tickets),
+      [
+        "|Feature|#|Name|Status|",
+        "|---|---|---|---|",
+        "|a|01|Ticket 01 of a|ready-for-agent|",
+      ].join("\n"),
+    );
+  });
+
+  it("is one line when every ticket is done, and when there is no .scratch", () => {
+    const root = mkdtempSync(join(tmpdir(), "tickets-"));
+    roots.push(root);
+
+    assert.strictEqual(
+      openTable(ticketsOf(["a", "01", "done", NONE])),
+      "No open tickets.",
+    );
+    assert.strictEqual(openTable(readTickets(root)), "No open tickets.");
   });
 });

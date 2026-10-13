@@ -48,6 +48,7 @@ function readBlockedBy(line, ownFeature) {
 export function readTickets(root = ".") {
   /** @type {Ticket[]} */
   const tickets = [];
+  if (!existsSync(join(root, ".scratch"))) return tickets;
   for (const feature of readdirSync(join(root, ".scratch")).sort()) {
     const dir = join(".scratch", feature, "issues");
     if (!existsSync(join(root, dir))) continue;
@@ -113,4 +114,34 @@ export function nextTicket(tickets, feature) {
       t.openBlockers.length === 0 &&
       (!feature || t.feature === feature),
   );
+}
+
+// A markdown table of every open ticket, or one line saying there are none.
+// Done tickets are left out, both as rows and as blockers. Wontfix tickets are
+// left out as rows, and still show as a blocker of a ticket that lists one.
+// A blocker shows as it is written on the ticket's Blocked by line. The table
+// is as short as it can be, since an agent reads and repeats it: a feature is
+// named on its first row only, the Blocked by column is there only when a row
+// fills it, and no cell is padded.
+/** @type {(tickets: Ticket[]) => string} */
+export function openTable(tickets) {
+  const open = tickets.filter(
+    (t) => t.status !== "done" && t.status !== "wontfix",
+  );
+  if (open.length === 0) return "No open tickets.";
+  const blocked = open.some((t) => t.openBlockers.length > 0);
+  const rows = [
+    ["Feature", "#", "Name", "Status", "Blocked by"],
+    ["---", "---", "---", "---", "---"],
+    ...open.map((t, i) => [
+      t.feature === open[i - 1]?.feature ? "" : t.feature,
+      t.number,
+      t.name,
+      t.status,
+      t.openBlockers.join(", "),
+    ]),
+  ];
+  return rows
+    .map((row) => `|${(blocked ? row : row.slice(0, -1)).join("|")}|`)
+    .join("\n");
 }
