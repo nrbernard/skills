@@ -9,10 +9,13 @@ import { parse } from "yaml";
 const repo = join(dirname(fileURLToPath(import.meta.url)), "..");
 const skillsDir = join(repo, "skills");
 
+/** @type {string[]} */
 const errors = [];
+/** @type {(path: string, message: string) => number} */
 const fail = (path, message) =>
   errors.push(`${relative(repo, path)}: ${message}`);
 
+/** @param {string} dir */
 const filesIn = (dir) =>
   readdirSync(dir, { withFileTypes: true, recursive: true })
     .filter((entry) => entry.isFile())
@@ -21,6 +24,10 @@ const filesIn = (dir) =>
 // The limits are the ones the `skills` CLI and the agents that load skills
 // apply: a kebab-case name of up to 64 characters that matches the folder, and
 // a description of up to 1024.
+/**
+ * @param {string} path
+ * @param {string} folder
+ */
 function checkFrontmatter(path, folder) {
   const block = readFileSync(path, "utf8").match(
     /^---\r?\n([\s\S]*?)\r?\n---/,
@@ -31,7 +38,10 @@ function checkFrontmatter(path, folder) {
   try {
     meta = parse(block);
   } catch (err) {
-    return fail(path, `frontmatter is not valid YAML: ${err.message}`);
+    return fail(
+      path,
+      `frontmatter is not valid YAML: ${/** @type {Error} */ (err).message}`,
+    );
   }
   if (meta === null || typeof meta !== "object" || Array.isArray(meta)) {
     return fail(path, "frontmatter is not a set of keys");
@@ -56,6 +66,7 @@ function checkFrontmatter(path, folder) {
 }
 
 // Fenced code is skipped, so a link written as an example is not followed.
+/** @param {string} path */
 function checkLinks(path) {
   const prose = readFileSync(path, "utf8").replace(
     /^\s*```[\s\S]*?^\s*```/gm,

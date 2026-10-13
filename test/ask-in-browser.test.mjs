@@ -30,6 +30,7 @@ const opened = join(bin, "opened");
 writeFileSync(join(bin, "open"), '#!/bin/sh\nprintf %s "$1" > "$OPENED"\n');
 chmodSync(join(bin, "open"), 0o755);
 
+/** @type {(port: number) => Promise<import("node:net").Server>} */
 const listen = (port) =>
   new Promise((done) => {
     const server = createServer().listen(port, "127.0.0.1", () => done(server));
@@ -37,12 +38,19 @@ const listen = (port) =>
 
 async function freePort() {
   const server = await listen(0);
-  const { port } = server.address();
+  const { port } = /** @type {import("node:net").AddressInfo} */ (
+    server.address()
+  );
   await new Promise((done) => server.close(done));
   return port;
 }
 
 // Starts the server and resolves once it prints where the form is.
+/**
+ * @param {import("node:test").TestContext} t
+ * @param {string | object} questions
+ * @param {number} port
+ */
 async function serve(t, questions, port) {
   const child = spawn(
     process.execPath,
@@ -60,6 +68,7 @@ async function serve(t, questions, port) {
   );
 
   const exited = new Promise((done) => child.on("close", done));
+  /** @type {string} */
   const url = await new Promise((done, fail) => {
     child.stdout.on("data", () => {
       const match = output.match(/Form at (\S+)/);
@@ -74,19 +83,23 @@ async function serve(t, questions, port) {
 
 // The questions as the page receives them, after the server has filled in ids
 // and option letters.
+/** @param {string} url */
 async function roundAt(url) {
   const res = await fetch(url);
   assert.equal(res.status, 200);
   const html = await res.text();
-  return { html, round: JSON.parse(html.match(/^const round = (.*);$/m)[1]) };
+  return {
+    html,
+    round: JSON.parse(html.match(/^const round = (.*);$/m)?.[1] ?? ""),
+  };
 }
 
 test("serves the example in SKILL.md and prints the answers", async (t) => {
   const skillMd = readFileSync(join(skill, "SKILL.md"), "utf8");
-  const example = skillMd.match(/<<'EOF'\n\s*(.*)\n\s*EOF/)[1];
+  const example = skillMd.match(/<<'EOF'\n\s*(.*)\n\s*EOF/)?.[1] ?? "";
   const { title, questions } = JSON.parse(example);
   for (const { options, rec } of questions) {
-    for (const letter of [].concat(rec)) {
+    for (const letter of /** @type {string[]} */ ([]).concat(rec)) {
       assert.ok(letter.charCodeAt(0) - 65 < options.length, `rec ${letter}`);
     }
   }
@@ -126,7 +139,7 @@ test("letters the options and preselects the recommendation", async (t) => {
   const [one, several] = round.questions;
 
   assert.deepEqual(
-    one.options.map((option) => option.key),
+    one.options.map((/** @type {{ key: string }} */ option) => option.key),
     ["A", "B", "C"],
   );
   assert.equal(one.id, "Q1");

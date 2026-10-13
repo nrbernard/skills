@@ -5,6 +5,18 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
+/**
+ * @typedef {object} Ticket
+ * @property {string} feature
+ * @property {string} number
+ * @property {string} name
+ * @property {string} status
+ * @property {{ written: string, key: string }[]} blockers
+ * @property {string[]} openBlockers
+ * @property {string[]} blockedByFaults
+ * @property {string} path
+ */
+
 // One blocker, NN (title) or <feature>-NN (title). A title can hold brackets of its own.
 const BLOCKER =
   /(?<![\w.-])(?:([\w.-]+)-)?(\d+[a-z]?) \((?:[^()]|\([^()]*\))*\)/g;
@@ -14,12 +26,14 @@ const BLOCKERS = new RegExp(`^${BLOCKER.source}(?:, ${BLOCKER.source})*$`);
 const NONE = "None (can start immediately)";
 
 // Ticket numbers restart in each feature, so a ticket is known by both.
+/** @type {(feature: string, number: string) => string} */
 const keyOf = (feature, number) => `${feature}/${number}`;
 
 // The blockers a Blocked by line names, in order, each as it is written, and
 // what the line holds besides them when it is neither a list of blockers nor
 // NONE. A blocker on a line that holds more is still a blocker. A ticket with
 // no line has no blockers and nothing unread.
+/** @type {(line: string | undefined, ownFeature: string) => { blockers: Ticket["blockers"], unread?: string }} */
 function readBlockedBy(line, ownFeature) {
   if (line === undefined || line === NONE) return { blockers: [] };
   const blockers = [...line.matchAll(BLOCKER)].map(([, feature, number]) => ({
@@ -32,6 +46,7 @@ function readBlockedBy(line, ownFeature) {
 }
 
 export function readTickets(root = ".") {
+  /** @type {Ticket[]} */
   const tickets = [];
   for (const feature of readdirSync(join(root, ".scratch")).sort()) {
     const dir = join(".scratch", feature, "issues");
@@ -63,6 +78,7 @@ export function readTickets(root = ".") {
         name,
         status,
         blockers,
+        openBlockers: [],
         blockedByFaults,
         path,
       });
@@ -89,6 +105,7 @@ export function readTickets(root = ".") {
 
 // The next ticket is the lowest-numbered ready-for-agent ticket whose every
 // blocker is done. Features go in name order.
+/** @type {(tickets: Ticket[], feature?: string) => Ticket | undefined} */
 export function nextTicket(tickets, feature) {
   return tickets.find(
     (t) =>

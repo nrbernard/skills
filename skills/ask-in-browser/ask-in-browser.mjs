@@ -5,10 +5,21 @@ import { readFileSync } from "node:fs";
 import { createServer } from "node:http";
 
 const [port = "4517"] = process.argv.slice(2);
+/**
+ * @typedef {object} Question
+ * @property {string} q
+ * @property {string[]} options
+ * @property {string | string[]} [rec]
+ * @property {string} [group]
+ * @property {string} [body]
+ * @property {string} [why]
+ */
+/** @type {{ title: string, facts?: string[], questions: Question[] }} */
 const input = JSON.parse(readFileSync(0, "utf8"));
 
 // Questions arrive as plain text with backticks and **bold**. Ids, option
 // letters and the subtitle are filled in here so the caller never writes them.
+/** @param {string} s */
 const md = (s) =>
   s
     .replace(/&/g, "&amp;")
@@ -27,7 +38,7 @@ const round = {
     title: md(q.q),
     body: q.body && md(q.body),
     multi: Array.isArray(q.rec),
-    recommended: [].concat(q.rec ?? []),
+    recommended: /** @type {string[]} */ ([]).concat(q.rec ?? []),
     options: q.options.map((o, j) => {
       const key = String.fromCharCode(65 + j);
       return { key, label: `<b>${key}.</b> ${md(o)}` };
@@ -146,7 +157,7 @@ const server = createServer((req, res) => {
 
 // Listens on the port asked for, or the next free one when a server from an
 // earlier session still holds it.
-server.on("error", (err) => {
+server.on("error", (/** @type {NodeJS.ErrnoException} */ err) => {
   if (err.code !== "EADDRINUSE") throw err;
   console.log(`Port ${tried} in use, trying ${tried + 1}`);
   tried += 1;

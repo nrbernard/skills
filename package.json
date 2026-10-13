@@ -4,14 +4,17 @@
   "type": "module",
   "scripts": {
     "lint": "biome check .",
+    "typecheck": "tsc",
     "test": "node --test \"test/**/*.test.mjs\"",
     "check-skills": "node scripts/check-skills.mjs",
-    "check": "npm run lint && npm run check-skills && npm test",
+    "check": "npm run lint && npm run typecheck && npm run check-skills && npm test",
     "format": "biome check --write .",
     "prepare": "git config core.hooksPath .githooks"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
+    "@types/node": "^24.19.2",
+    "typescript": "^7.0.2",
     "yaml": "^2.9.1"
   }
 }

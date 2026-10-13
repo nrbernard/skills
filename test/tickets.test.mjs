@@ -5,6 +5,9 @@ import { join } from "node:path";
 import { afterEach, describe, it } from "node:test";
 import { nextTicket, readTickets } from "../skills/tickets/tickets.mjs";
 
+/** @import { Ticket } from "../skills/tickets/tickets.mjs" */
+
+/** @type {string[]} */
 const roots = [];
 afterEach(() => {
   for (const root of roots.splice(0))
@@ -13,6 +16,8 @@ afterEach(() => {
 
 // Writes a .scratch of tickets to a temporary directory. Each ticket is
 // [feature, number, status, its Blocked by line's text or null for no line].
+/** @typedef {[feature: string, number: string, status: string, blockedBy: string | null]} Written */
+/** @param {...Written} written */
 function rootOf(...written) {
   const root = mkdtempSync(join(tmpdir(), "tickets-"));
   roots.push(root);
@@ -28,10 +33,17 @@ function rootOf(...written) {
   return root;
 }
 
+/** @param {...Written} written */
 const ticketsOf = (...written) => readTickets(rootOf(...written));
 
-const ticket = (tickets, feature, number) =>
-  tickets.find((t) => t.feature === feature && t.number === number);
+/** @type {(tickets: Ticket[], feature: string, number: string) => Ticket} */
+const ticket = (tickets, feature, number) => {
+  const found = tickets.find(
+    (t) => t.feature === feature && t.number === number,
+  );
+  assert.ok(found, `no ticket ${feature}/${number}`);
+  return found;
+};
 const NONE = "None (can start immediately)";
 
 describe("a blocker in another feature", () => {
@@ -91,6 +103,7 @@ describe("a blocker in another feature", () => {
 });
 
 describe("a Blocked by line that names no ticket, or cannot be read", () => {
+  /** @param {Ticket[]} tickets */
   const faultsOf = (tickets) => tickets.flatMap((t) => t.blockedByFaults);
 
   it("is a fault naming the ticket and the blocker, for a number that is no ticket in the feature and for a feature that is no directory", () => {
