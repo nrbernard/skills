@@ -5,7 +5,8 @@ Agent skills, one folder each under `skills/`.
 | Skill | What it does |
 | --- | --- |
 | [`ask-in-browser`](skills/ask-in-browser/SKILL.md) | Asks every grilling round, and any other question that is a choice between options, as a browser form in place of chat, with the recommended answers preselected. Needs Node and macOS (`open`). |
-| [`tickets`](skills/tickets/SKILL.md) | `/tickets` prints a table of every open ticket under `.scratch/<feature>/issues/`, with its number, name, status and open blockers. Needs Node and Claude Code. |
+| [`cupcake`](skills/cupcake/SKILL.md) | `/cupcake [spec]` writes the next ticket of a feature: the smallest step that makes it more useful than it is today, judged from what is already built. One ticket per run, right before it is built, so the spec can change between. Writes the ticket format `tickets` reads. |
+| [`tickets`](skills/tickets/SKILL.md) | `/tickets` prints a table of every open ticket under `.scratch/<feature>/issues/`, with its number, name, status and open blockers. `/tickets next [feature]` prints the one to pick up: the lowest-numbered ready-for-agent ticket whose blockers are all done. Needs Node and Claude Code. |
 
 ## Install
 
