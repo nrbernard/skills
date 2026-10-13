@@ -1,11 +1,11 @@
 ---
 name: ask-in-browser
-description: Questions for the user as a browser form. Use to ask any question that is a choice between options.
+description: Questions for the user as a browser form, in place of chat. Use for every grilling round, and for any other question that is a choice between options.
 metadata:
-  version: "0.2.0"
+  version: "0.2.1"
 ---
 
-Ask the questions as a browser form, in place of asking in chat. The form server sits beside this file.
+The form server sits beside this file.
 
 1. Serve the questions in the background, as minified JSON on stdin. It opens the browser and exits once the answers are sent.
 
