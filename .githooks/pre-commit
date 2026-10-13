@@ -1,0 +1,13 @@
+#!/bin/sh
+# Formats and lints the staged files with Biome, and stages what it fixed.
+# A fixed file is staged whole, so the rest of a partly staged file comes too.
+# Then checks the skills and runs the tests, as CI does.
+files=$(git diff --cached --name-only --diff-filter=ACMR -z | tr '\0' '\n')
+
+if [ -n "$files" ]; then
+  npx --no-install biome check --write --staged --no-errors-on-unmatched || exit 1
+  printf '%s\n' "$files" | tr '\n' '\0' | xargs -0 git add --
+fi
+
+npm run --silent check-skills || exit 1
+npm test --silent || exit 1

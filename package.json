@@ -3,15 +3,15 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "lint": "eslint .",
+    "lint": "biome check .",
     "test": "node --test \"test/**/*.test.mjs\"",
     "check-skills": "node scripts/check-skills.mjs",
-    "check": "npm run lint && npm run check-skills && npm test"
+    "check": "npm run lint && npm run check-skills && npm test",
+    "format": "biome check --write .",
+    "prepare": "git config core.hooksPath .githooks"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
-    "eslint": "^10.12.0",
-    "globals": "^17.13.0",
+    "@biomejs/biome": "2.5.15",
     "yaml": "^2.9.1"
   }
 }

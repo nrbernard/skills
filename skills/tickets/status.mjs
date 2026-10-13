@@ -9,5 +9,7 @@ console.log("| Feature | # | Name | Status | Blocked by |");
 console.log("| --- | --- | --- | --- | --- |");
 for (const t of readTickets()) {
   if (t.status === "done" || t.status === "wontfix") continue;
-  console.log(`| ${t.feature} | ${t.number} | ${t.name} | ${t.status} | ${t.openBlockers.join(", ")} |`);
+  console.log(
+    `| ${t.feature} | ${t.number} | ${t.name} | ${t.status} | ${t.openBlockers.join(", ")} |`,
+  );
 }

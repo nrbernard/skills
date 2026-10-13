@@ -2,11 +2,12 @@
 // **Status:** and **Blocked by:** lines. Ticket numbers restart in each
 // feature, so a blocker written as a bare number is a ticket in the blocked
 // ticket's own feature, and one in another feature is written <feature>-NN.
-import { readdirSync, readFileSync, existsSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 // One blocker, NN (title) or <feature>-NN (title). A title can hold brackets of its own.
-const BLOCKER = /(?<![\w.-])(?:([\w.-]+)-)?(\d+[a-z]?) \((?:[^()]|\([^()]*\))*\)/g;
+const BLOCKER =
+  /(?<![\w.-])(?:([\w.-]+)-)?(\d+[a-z]?) \((?:[^()]|\([^()]*\))*\)/g;
 // A whole line of blockers, each parted from the next by a comma and a space.
 const BLOCKERS = new RegExp(`^${BLOCKER.source}(?:, ${BLOCKER.source})*$`);
 
@@ -40,21 +41,48 @@ export function readTickets(root = ".") {
       .sort()) {
       const path = join(dir, file);
       const text = readFileSync(join(root, path), "utf8");
-      const [, number, name] = text.match(/^# (\S+?):\s*(.+)$/m) ?? [undefined, file, file];
+      const [, number, name] = text.match(/^# (\S+?):\s*(.+)$/m) ?? [
+        undefined,
+        file,
+        file,
+      ];
       const status = text.match(/^\*\*Status:\*\*\s*(.+)$/m)?.[1].trim() ?? "?";
-      const blockedBy = text.match(/^\*\*Blocked by:\*\*[ \t]*(.*)$/m)?.[1].trim();
+      const blockedBy = text
+        .match(/^\*\*Blocked by:\*\*[ \t]*(.*)$/m)?.[1]
+        .trim();
       const { blockers, unread } = readBlockedBy(blockedBy, feature);
       // What a test holds every ticket in the repo to having none of: each says
       // which ticket and what is wrong with its Blocked by line.
-      const blockedByFaults = unread === undefined ? [] : [`${path}: Blocked by cannot be read: "${unread}"`];
-      tickets.push({ feature, number, name, status, blockers, blockedByFaults, path });
+      const blockedByFaults =
+        unread === undefined
+          ? []
+          : [`${path}: Blocked by cannot be read: "${unread}"`];
+      tickets.push({
+        feature,
+        number,
+        name,
+        status,
+        blockers,
+        blockedByFaults,
+        path,
+      });
     }
   }
-  const done = new Set(tickets.filter((t) => t.status === "done").map((t) => keyOf(t.feature, t.number)));
+  const done = new Set(
+    tickets
+      .filter((t) => t.status === "done")
+      .map((t) => keyOf(t.feature, t.number)),
+  );
   const known = new Set(tickets.map((t) => keyOf(t.feature, t.number)));
   for (const t of tickets) {
-    t.openBlockers = t.blockers.filter((b) => !done.has(b.key)).map((b) => b.written);
-    t.blockedByFaults.unshift(...t.blockers.filter((b) => !known.has(b.key)).map((b) => `${t.path}: Blocked by names no ticket: ${b.written}`));
+    t.openBlockers = t.blockers
+      .filter((b) => !done.has(b.key))
+      .map((b) => b.written);
+    t.blockedByFaults.unshift(
+      ...t.blockers
+        .filter((b) => !known.has(b.key))
+        .map((b) => `${t.path}: Blocked by names no ticket: ${b.written}`),
+    );
   }
   return tickets;
 }
@@ -62,5 +90,10 @@ export function readTickets(root = ".") {
 // The next ticket is the lowest-numbered ready-for-agent ticket whose every
 // blocker is done. Features go in name order.
 export function nextTicket(tickets, feature) {
-  return tickets.find((t) => t.status === "ready-for-agent" && t.openBlockers.length === 0 && (!feature || t.feature === feature));
+  return tickets.find(
+    (t) =>
+      t.status === "ready-for-agent" &&
+      t.openBlockers.length === 0 &&
+      (!feature || t.feature === feature),
+  );
 }
