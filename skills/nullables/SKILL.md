@@ -21,7 +21,7 @@ Logic and Infrastructure never depend on each other; Values carry data between t
 
 Every Wrapper and Application class:
 
-- Has a parameterless `static create()` that wires real dependencies, and a `static createNull(options = {})` that returns the same class with the outside world off. `createNull()` is production code in the same file; everything except the external call runs for real.
+- Has a `static create()` that wires real dependencies, taking each as an optional named override (`create({ store = ImportStore.create() } = {})`), and a `static createNull(options = {})` that returns the same class with the outside world off. `createNull()` is production code in the same file; everything except the external call runs for real.
 - Does no work in its constructor. Connecting, starting, and listening happen in `connect()` / `start()`.
 - Nulls itself one of two ways:
   - **Embedded Stub** (low-level wrapper): `createNull()` injects a minimal stub of the *third-party* library, defined in the same file. Stub only what the wrapper calls.
@@ -36,7 +36,7 @@ Code shapes and helper implementations (`ConfigurableResponses`, `OutputTracker`
 
 - **Logic**: plain arrange-act-assert on return values.
 - **Wrapper**: **Narrow Integration Tests** against the real system, using a local dedicated instance (the Compose Postgres, a temp directory). Cover failure paths too (errors, timeouts, malformed responses): **paranoic telemetry**, every failure logged or thrown. Then test the Nulled instance, which also proves the Embedded Stub matches reality.
-- **Application**: construct with Nulled dependencies, configure their responses, act, then assert on returned values, resulting state, or tracked output.
+- **Application**: build the **subject under test** with its `create()`, passing Nulled dependencies (`Ledger.create({ store: ImportStore.createNull() })`), configure their responses, act, then assert on returned values, resulting state, or tracked output. `create()` is the production path, so the test exercises the wiring production runs, and a dependency missing its Null surfaces as a test reaching the outside world. A class's own `createNull()` serves the classes above it.
 - Every dependency in a test is the real class, Nulled at the infrastructure edge. The only stubbed code is third-party code, inside an Embedded Stub. Mocking libraries and interaction assertions (`vi.fn`, `jest.mock`, `toHaveBeenCalledWith`) stay out; their job belongs to Configurable Responses and Output Tracking.
 - **Signature Shielding**: route repeated setup through a helper taking optional named options with defaults and returning an object, so tests survive signature changes:
 
@@ -44,7 +44,7 @@ Code shapes and helper implementations (`ConfigurableResponses`, `OutputTracker`
   async function importFile({ file = sampleQfx(), now = "2026-01-01" } = {}) {
     const store = ImportStore.createNull();
     const saves = store.trackSaves();
-    const ledger = new Ledger(store, Clock.createNull({ now }));
+    const ledger = Ledger.create({ store, clock: Clock.createNull({ now }) });
     const summary = await ledger.importFile(file);
     return { summary, saves: saves.data };
   }
@@ -59,5 +59,6 @@ Converting existing code that uses mocks or has no seams: [LEGACY.md](LEGACY.md)
 - Every class is classified, and none mixes Logic with Infrastructure.
 - Every Wrapper and Application class has `create()` and `createNull()`, and a test exercising its Nulled instance.
 - Every Wrapper has Narrow Integration Tests against the real system, failure paths included.
+- Every Application test builds its subject under test with `create()` and Nulled dependencies.
 - Every write a test cares about is visible through Output Tracking; every pushed event through Behavior Simulation.
 - Every assertion checks a value, a state, or tracked output.

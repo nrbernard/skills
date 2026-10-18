@@ -140,19 +140,19 @@ export class ExportWatcher {
 
 ## Fake It Once You Make It
 
-A higher-level class's `createNull()` composes Nulled dependencies and translates its options into theirs. The constructor stays public so tests can pass in a Nulled dependency they hold a tracker on.
+A higher-level class's `createNull()` composes Nulled dependencies and translates its options into theirs. Its `create()` takes each dependency as an optional override defaulting to the real one, so a test builds the subject under test through `create()`, passing in Nulled dependencies it holds a tracker on.
 
 ```ts
 export class Ledger {
-  static create() {
-    return new Ledger(ImportStore.create(), Clock.create());
+  static create({ store = ImportStore.create(), clock = Clock.create() }: { store?: ImportStore; clock?: Clock } = {}) {
+    return new Ledger(store, clock);
   }
 
   static createNull({ storedImports = [], now }: { storedImports?: StoredImport[]; now?: string } = {}) {
-    return new Ledger(ImportStore.createNull({ imports: storedImports }), Clock.createNull({ now }));
+    return Ledger.create({ store: ImportStore.createNull({ imports: storedImports }), clock: Clock.createNull({ now }) });
   }
 
-  constructor(private readonly store: ImportStore, private readonly clock: Clock) {}
+  private constructor(private readonly store: ImportStore, private readonly clock: Clock) {}
 }
 ```
 
