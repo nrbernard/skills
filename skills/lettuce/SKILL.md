@@ -5,7 +5,7 @@ description: Test-driven development. Use when the user wants to build features 
 
 # Test-Driven Development
 
-TDD is the red → green loop. This skill is the reference that makes that loop produce tests worth keeping: what a good test is, where tests go, the anti-patterns, and the rules of the loop. Every section applies on every cycle: consult them before and during the loop, not after.
+TDD is the red → green loop. This skill is the reference that makes that loop produce tests worth keeping: what a good test is, where tests go, how many, the anti-patterns, and the rules of the loop. Every section applies on every cycle: consult them before and during the loop, not after.
 
 When exploring the codebase, read `GLOSSARY.md` (if it exists) so test names and interface vocabulary match the project's domain language, and respect ADRs in the area you're touching.
 
@@ -21,11 +21,19 @@ See [tests.md](tests.md) for examples.
 
 A **seam** is the public boundary you test at: the interface where you observe behavior without reaching inside. Tests live at seams, never against internals.
 
-**Test only at pre-agreed seams.** Before writing any test, write down the seams under test and confirm them with the user. No test is written at an unconfirmed seam. You can't test everything, so agreeing the seams up front is how testing effort lands on the critical paths and complex logic instead of every edge case.
+**Test only at pre-agreed seams.** Before writing any test, write down the seams under test and the tests planned at each, one line per test: its name, the regression only it catches, and its cost when it crosses a process, database or network boundary. Confirm the list with the user. No test is written at an unconfirmed seam, and a test the loop turns up later goes on the list, with its line, before it is written. You can't test everything, so agreeing the seams up front is how testing effort lands on the critical paths and complex logic instead of every edge case.
 
 Ask: "What's the public interface, and which seams should we test?"
 
 When the shape of that interface is itself in question (how deep the module is, where the seam belongs, what the interface should expose), call the Skill tool with "codebase-design" for the vocabulary. It is the shared source of the module, interface, depth, seam, adapter, leverage and locality terms, and it is a reference to consult, not a session to run.
+
+## Owners: how many tests
+
+Each behaviour has one **owner** test, at the highest seam that shows it. Tests of its dependents assert only what the dependent adds. James Shore: "don't test all phases of the moon in your describeMoonPhase() tests, but do test them in your Moon tests."
+
+- **Name the regression.** Before adding a test, name the bug that would turn it red. When an existing test already goes red on that bug, extend that test or add a row to its table.
+- **Equivalence classes.** Cases cover one ordinary value, each value the code treats differently, and the boundaries between them: one refused input per guard.
+- **Cost.** A test that crosses a process, database or network boundary costs orders of magnitude more than an in-memory one, on every run. It covers only what that boundary alone shows, such as a query or a file format.
 
 ## Anti-patterns
 
@@ -36,5 +44,5 @@ When the shape of that interface is itself in question (how deep the module is, 
 ## Rules of the loop
 
 - **Red before green.** Write the failing test first, then only enough code to pass it. Don't anticipate future tests or add speculative features.
-- **One slice at a time.** One seam, one test, one minimal implementation per cycle.
+- **One slice at a time.** One seam, one behaviour, one minimal implementation per cycle. The behaviour's test is a new owner, or a row in the owner it extends.
 - **Refactoring is not part of the loop.** It belongs to the review stage (see the `code-review` skill), not the red → green implementation cycle.

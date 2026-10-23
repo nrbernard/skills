@@ -36,6 +36,7 @@ Code shapes and helper implementations (`ConfigurableResponses`, `OutputTracker`
 
 - **Logic**: plain arrange-act-assert on return values.
 - **Wrapper**: **Narrow Integration Tests** against a local, dedicated system: the Compose Postgres, a temp directory, or, for a third-party web service, a localhost HTTP server the test starts, which records each request and answers as the test sets. Cover failure paths too (errors, timeouts, malformed responses): **paranoic telemetry**, every failure logged or thrown. Then test the Nulled instance, which proves the Embedded Stub matches the driver it replaces. A third-party service's own behaviour lives in Configurable Responses, each commented with where it was seen; changes on its side surface through paranoic telemetry in production.
+- Test each behaviour once, at the class that owns it: "don't test all phases of the moon in your describeMoonPhase() tests, but do test them in your Moon tests." A dependent's tests cover only what the dependent adds.
 - **Application**: build the **subject under test** with its `create()`, passing Nulled dependencies (`Ledger.create({ store: ImportStore.createNull() })`), configure their responses, act, then assert on returned values, resulting state, or tracked output. `create()` is the production path, so the test exercises the wiring production runs, and a dependency missing its Null surfaces as a test reaching the outside world. A class's own `createNull()` serves the classes above it.
 - Every dependency in a test is the real class, Nulled at the infrastructure edge. The only stubbed code is third-party code, inside an Embedded Stub. Mocking libraries and interaction assertions (`vi.fn`, `jest.mock`, `toHaveBeenCalledWith`) stay out; their job belongs to Configurable Responses and Output Tracking.
 - **Signature Shielding**: route repeated setup through a helper taking optional named options with defaults and returning an object, so tests survive signature changes:
@@ -57,7 +58,7 @@ Converting existing code that uses mocks or has no seams: [LEGACY.md](LEGACY.md)
 ## Done when
 
 - Every class is classified, and none mixes Logic with Infrastructure.
-- Every Wrapper and Application class has `create()` and `createNull()`, and a test exercising its Nulled instance.
+- Every Wrapper and Application class has `create()` and `createNull()`, and each behaviour its Nulled instance offers is exercised by a test.
 - Every Wrapper has Narrow Integration Tests against a local, dedicated system, failure paths included.
 - Every Application test builds its subject under test with `create()` and Nulled dependencies.
 - Every write a test cares about is visible through Output Tracking; every pushed event through Behavior Simulation.
