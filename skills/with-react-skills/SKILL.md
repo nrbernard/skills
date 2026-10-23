@@ -1,9 +1,9 @@
 ---
 name: with-react-skills
-description: Route the React and UI skills through the /implement that follows.
+description: Route the React and UI skills through the /bake that follows.
 disable-model-invocation: true
 metadata:
-  version: "0.1.0"
+  version: "0.2.0"
 ---
 
 For the UI work that follows in this session, load each skill below through the Skill tool the first time its trigger holds:
