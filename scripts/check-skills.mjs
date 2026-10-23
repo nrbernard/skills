@@ -102,10 +102,12 @@ for (const folder of folders) {
   markdown.forEach(checkLinks);
 
   // A file nothing mentions is one the agent never finds, which is what a
-  // rename on one side only leaves behind.
+  // rename on one side only leaves behind. A LICENSE is for people, not the
+  // agent, so it needs no mention.
   const text = markdown.map((file) => readFileSync(file, "utf8")).join("\n");
   for (const file of files) {
-    if (file === skillPath || text.includes(basename(file))) continue;
+    if (file === skillPath || basename(file) === "LICENSE") continue;
+    if (text.includes(basename(file))) continue;
     fail(file, "not mentioned in the skill's markdown");
   }
 }
