@@ -1,11 +1,11 @@
 ---
 name: lettuce
-description: Test-driven development. Use when the user wants to build features or fix bugs test-first, mentions "red-green-refactor", or wants integration tests.
+description: "Test-driven development: the red → green → refactor loop of tests. Use when building a feature or fixing a bug test-first, or before planning or adding any test."
 ---
 
 # Test-Driven Development
 
-TDD is the red → green loop. This skill is the reference that makes that loop produce tests worth keeping: what a good test is, where tests go, how many, the anti-patterns, and the rules of the loop. Every section applies on every cycle: consult them before and during the loop, not after.
+TDD is the red → green → refactor loop. This skill is the reference that makes that loop produce tests worth keeping: what a good test is, where tests go, how many, the anti-patterns, and the rules of the loop. Every section applies on every cycle: consult them before and during the loop, not after.
 
 When exploring the codebase, read `GLOSSARY.md` (if it exists) so test names and interface vocabulary match the project's domain language, and respect ADRs in the area you're touching.
 
@@ -45,4 +45,4 @@ Each behaviour has one **owner** test, at the highest seam that shows it. Tests 
 
 - **Red before green.** Write the failing test first, then only enough code to pass it. Don't anticipate future tests or add speculative features.
 - **One slice at a time.** One seam, one behaviour, one minimal implementation per cycle. The behaviour's test is a new owner, or a row in the owner it extends.
-- **Refactoring is not part of the loop.** It belongs to the review stage (see the `code-review` skill), not the red → green implementation cycle.
+- **Refactor on green, when it's due.** With the test green, look over the code the slice touched. When the slice left duplication, an unclear name, or a shape the next slice will fight, clean it up, keeping every test green. When it left the code clean, go straight to the next red. Review (the `code-review` skill) may turn up more to refactor afterwards, but that is optional.
