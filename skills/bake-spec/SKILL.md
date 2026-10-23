@@ -22,19 +22,22 @@ Communication to and from subagents should be sparse. Communicate primarily thro
 
 2. (optional) Use an **exploration subagent** to conduct any exploration required by the tickets - relevant codebase files or external documentation. Ensure the exploration subagent can save files - it should save its markdown notes in a directory outside the repo, accessible by all future subagents. This lets **implementer subagents** focus on implementation rather than exploration.
 
-3. Create the integration branch. If the issue tracker closes work through PRs, or the user asks for one, open a draft PR after the first merge in step 5 (a branch with no commits ahead of main can't open one), marked as closing the spec and tickets.
+3. Agree the **test list**. Call the Skill tool with `lettuce`, and for every ticket write down its seams and planned tests the way `lettuce` asks, one line per test. Confirm the whole list with the user in one pass. **Implementer subagents** run in the background and can't ask the user, so this is the confirmation each one builds on.
 
-4. Use **implementer subagents** to implement each ticket, each in its own worktree on its own branch. Each implementer subagent:
+4. Create the integration branch. If the issue tracker closes work through PRs, or the user asks for one, open a draft PR after the first merge in step 6 (a branch with no commits ahead of main can't open one), marked as closing the spec and tickets.
+
+5. Use **implementer subagents** to implement each ticket, each in its own worktree on its own branch, each given a pointer to its ticket's part of the agreed test list. Each implementer subagent:
    - confirms its worktree is based on the integration branch before starting, and resets onto it if not;
-   - calls the Skill tool with `lettuce` to build the ticket;
+   - calls the Skill tool with `lettuce` to build the ticket, treating its part of the test list as the confirmed seams and tests;
+   - writes the tests on that list, and names any further test it would add in its report, with its line, in place of writing it;
    - merges the integration branch tip into its own branch before reporting done
 
-5. Once an **implementer subagent** completes, merge its work to the integration branch with a **merger subagent**.
+6. Once an **implementer subagent** completes, merge its work to the integration branch with a **merger subagent**.
 
-6. If this changes the **frontier** of available tickets, kick off more **implementer subagents** to work on the new tickets. This allows for maximum concurrency.
+7. If this changes the **frontier** of available tickets, kick off more **implementer subagents** to work on the new tickets. This allows for maximum concurrency.
 
-7. Once all tickets are complete, call the Skill tool with `code-review` on the integration branch. Fix all issues raised by the code review in a single **implementer subagent**.
+8. Once all tickets are complete, call the Skill tool with `code-review` on the integration branch. When the implementers named further tests, put them to the user. Fix all issues raised by the code review, and add the tests the user approved, in a single **implementer subagent**.
 
-8. If a draft PR exists, mark it ready for review. Otherwise, resolve each ticket the way the issue tracker closes work, and report the integration branch.
+9. If a draft PR exists, mark it ready for review. Otherwise, resolve each ticket the way the issue tracker closes work, and report the integration branch.
 
-9. Clean up all **implementer subagent** worktrees.
+10. Clean up all **implementer subagent** worktrees.
