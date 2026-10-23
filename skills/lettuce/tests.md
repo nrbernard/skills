@@ -2,7 +2,7 @@
 
 ## Good Tests
 
-**Integration-style**: Test through real interfaces, not mocks of internal parts.
+**Sociable**: Test through real interfaces and real collaborators, with the outside world Nulled.
 
 ```typescript
 // GOOD: Tests observable behavior
@@ -33,13 +33,21 @@ test("checkout calls paymentService.process", async () => {
   await checkout(cart, payment);
   expect(mockPayment.process).toHaveBeenCalledWith(cart.total);
 });
+
+// GOOD: Real collaborators, the payment gateway Nulled, asserts on tracked output
+test("checkout charges the cart total", async () => {
+  const payments = PaymentClient.createNull();
+  const charges = payments.trackCharges();
+  const shop = Shop.create({ payments });
+  await shop.checkout(createCart([{ price: 10 }, { price: 5 }]));
+  expect(charges.data).toEqual([{ amount: 15 }]);
+});
 ```
 
 Red flags:
 
-- Mocking internal collaborators
+- Mocks, spies, or interaction assertions (`jest.mock`, `vi.fn`, `toHaveBeenCalledWith`, call counts or order)
 - Testing private methods
-- Asserting on call counts/order
 - Test breaks when refactoring without behavior change
 - Test name describes HOW not WHAT
 - Verifying through external means instead of interface
