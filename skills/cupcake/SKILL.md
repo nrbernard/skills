@@ -1,10 +1,9 @@
 ---
 name: cupcake
-description: Write the next ticket of a feature, the smallest step that makes it more useful than it is today, judged from what is already built. One ticket per run, right before it is built, so the spec can change between.
-disable-model-invocation: true
+description: Write the next ticket of a feature, the smallest step that makes it more useful than it is today. Use when a spec needs its next ticket.
 argument-hint: "[spec path, issue or feature]"
 metadata:
-  version: "0.1.0"
+  version: "0.2.0"
 ---
 
 Write the next ticket of the feature: $ARGUMENTS
@@ -17,7 +16,7 @@ One ticket is written at a time, right before it is built, so what the last one 
 
 1. **Find the spec and the feature.** The argument names a spec file, an issue, or a feature under `.scratch/`; with none, the spec is the one in the conversation. The feature is the spec's `.scratch/<feature>/` directory, made from the spec's name when there is none yet. Done when the whole spec is in context and the feature directory is known.
 
-2. **Establish what stands.** Read every ticket of the feature, then the code, since a ticket says what was meant and the code says what is. Mark every promise in the spec as met, promised by an open ticket, or unmet. Note what building the done tickets taught that the spec now gets wrong or no longer needs. Done when every promise carries one of the three marks, each from the code.
+2. **Establish what stands.** Read every ticket of the feature, then the code, since a ticket says what was meant and the code says what is. Mark every promise in the spec as met, promised by an open ticket, or unmet. Note what building the done tickets taught that the spec now gets wrong or no longer needs. Done when every promise carries one of the three marks, each from the code. When every promise is met, report the spec built and write no ticket.
 
 3. **Pick the cupcake.** Of the unmet promises, the most important need, at the smallest size that is useful on its own, as one sentence of behaviour a user could check.
    - **Useful on its own** means someone gets something from it the day it lands: a user, or the author of the next ticket, who now has a real thing to react to. A layer nobody can use yet is a part, and a part is not a step.
