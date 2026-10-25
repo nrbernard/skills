@@ -17,7 +17,7 @@ Each bake runs in a fresh **baker subagent**, so each ticket is written and buil
 
 1. Read the spec.
 
-2. (optional) Use an **exploration subagent** to conduct any exploration the spec requires - relevant codebase files or external documentation. Ensure the exploration subagent can save files - it should save its markdown notes in a directory outside the repo, accessible by all future subagents. This lets **baker subagents** focus on building rather than exploration.
+2. (optional) Use an **exploration subagent** to conduct any exploration the spec requires - relevant codebase files or external documentation. Give it an agent type with the Write tool, such as `general-purpose` (`Explore` is read-only) - it should save its markdown notes in a directory outside the repo, accessible by all future subagents. This lets **baker subagents** focus on building rather than exploration.
 
 3. Create the integration branch and check it out. If the issue tracker closes work through PRs, or the user asks for one, open a draft PR after the first bake in step 4 (a branch with no commits ahead of main can't open one), marked as closing the spec and its tickets.
 
