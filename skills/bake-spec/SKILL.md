@@ -23,7 +23,7 @@ Each bake runs in a fresh **baker subagent**, so each ticket is written and buil
 
 4. Run one **baker subagent** on the integration branch, and wait for it. The baker subagent:
    - calls the Skill tool with `bake` against the spec;
-   - takes `cupcake`'s first pick where it offers the choice, and leaves the spec unchanged, naming in its report any spec change `cupcake` found;
+   - takes `cupcake`'s first pick where it offers the choice, and builds the spec as written, leaving its text unchanged. Any spec change, whether `cupcake` finds it or the build does, it names in its report for the user to decide;
    - signs off its own seams and test list where `lettuce` asks the user, holding each test to `lettuce`'s owner rules;
    - reports the ticket it built, with the suite green, or that every promise of the spec is met.
 
