@@ -28,7 +28,7 @@ One ticket is written at a time, right before it is built, so what the last one 
 
 4. **Offer the choice.** The cupcake first, then the one or two runners-up with why each lost, as options. Where step 2 found the spec wrong, whether to change it is a question of its own. Done when the user has chosen.
 
-5. **Publish the ticket** where the repo's issue tracker config says, or as `.scratch/<feature>/issues/<NN>-<slug>.md`, numbered after the feature's highest, in the shape below. Make the spec edits the user chose. Done when the ticket file and the spec both match the decision.
+5. **Publish the ticket** where the repo's issue tracker config says, or as `.scratch/<feature>/issues/<NN>-<slug>.md`, numbered after the feature's highest, in the shape below. Make the spec edits the user chose. Done when the ticket file matches the decision, and every line of it agrees with the spec as it now stands.
 
 ```markdown
 # <NN>: <Title>
