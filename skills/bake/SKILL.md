@@ -14,6 +14,6 @@ Run typechecking regularly, single test files regularly, and the full test suite
 
 Once done, use /code-review to review the work.
 
-Set the ticket's status to `done`, unless the issue tracker closes work through PRs.
+Resolve the ticket the way the issue tracker closes work, unless it closes work through PRs.
 
 Commit your work to the current branch.
