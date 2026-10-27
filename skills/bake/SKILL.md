@@ -1,10 +1,12 @@
 ---
 name: bake
-description: "Build a spec's next ticket: write it with /cupcake, then build it. Use when building a spec one ticket at a time."
+description: "Write a spec's next ticket with /cupcake, then build it. Use when building a spec one ticket at a time."
 argument-hint: "[spec path, issue or feature]"
 ---
 
-Call the Skill tool with `cupcake` against the spec the user named: $ARGUMENTS. If it writes no ticket, report the spec built and stop.
+When the feature of the spec the user named ($ARGUMENTS) already has an open ticket, report its number and stop: a bake builds only the ticket its own cupcake writes, so tickets planned ahead of the build, or one an earlier bake left unbuilt, are the user's to settle.
+
+Call the Skill tool with `cupcake` against that spec. If it writes no ticket, report the spec built and stop.
 
 Implement the ticket it wrote.
 
