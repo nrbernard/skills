@@ -46,7 +46,7 @@ test("checkout charges the cart total", async () => {
 
 Red flags:
 
-- Mocks, spies, or interaction assertions (`jest.mock`, `vi.fn`, `toHaveBeenCalledWith`, call counts or order)
+- Mocked modules or collaborators, spies on real code, or assertions on how a collaborator was called (`jest.mock`, `vi.mock`, `vi.spyOn`, call counts or order). A `vi.fn()` passed as a component's callback prop is its tracked output (the `nullables` skill).
 - Testing private methods
 - Test breaks when refactoring without behavior change
 - Test name describes HOW not WHAT
