@@ -29,7 +29,7 @@ Each bake runs in a fresh **baker subagent**, so each ticket is written and buil
 
 5. When the baker names a spec change, put it to the user, and make the edits they choose before the next bake.
 
-6. Repeat steps 4 and 5 until a baker reports every promise of the spec met. A baker that reports its ticket unbuilt, or the suite red, stops the loop: report it to the user.
+6. Repeat steps 4 and 5 until a baker reports every promise of the spec met. A baker that reports its ticket unbuilt, an open ticket it found, or the suite red, stops the loop: report it to the user.
 
 7. Once the spec is built, call the Skill tool with `code-review` on the integration branch. Fix all issues raised by the code review in a single **baker subagent**, building with `lettuce` in place of `bake`.
 
