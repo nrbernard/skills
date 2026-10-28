@@ -11,7 +11,7 @@ When the spec's feature already has an open ticket, report its number and stop: 
 
 Call the Skill tool with `cupcake` for its definitions: a cupcake, the ticket's shape and the promises file. Follow this skill's steps in place of its own; this skill writes the whole set where `cupcake` writes one.
 
-Nothing is built while the set is written, so each ticket learns only from the code and the spec. `/bake` brings each one up to date with what has landed, right before building it.
+Nothing is built while the set is written, so each ticket learns only from the code and the spec. `/bake` brings each one up to date with what its blockers built, right before building it.
 
 The issue tracker should have been provided to you. If not, tell the user to run `/setup-matt-pocock-skills`.
 
@@ -38,4 +38,4 @@ The issue tracker should have been provided to you. If not, tell the user to run
 
 6. **Publish.** Make the spec edits the user chose, and add the problems they left open to the spec's comments. Write each ticket in `cupcake`'s shape, numbered in dependency order, then mark each promise in the promises file with its ticket's number. Done when every ticket file matches the approved set, and the promises file agrees with it.
 
-7. Name the next step: `/bake`, which builds the set.
+7. Name the next step: `/bake-spec`, which builds the set.
