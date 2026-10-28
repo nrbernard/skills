@@ -14,7 +14,7 @@ Use /lettuce where possible, at pre-agreed seams.
 
 Run typechecking regularly, single test files regularly, and the full test suite once at the end.
 
-Once done, use /code-review to review the work.
+Once done, call the Skill tool with `test-audit` on the ticket's diff and fix what it finds, then use /code-review to review the work.
 
 Resolve the ticket the way the issue tracker closes work, unless it closes work through PRs.
 
