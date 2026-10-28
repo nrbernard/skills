@@ -21,7 +21,7 @@ See [tests.md](tests.md) for examples.
 
 A **seam** is the public boundary you test at: the interface where you observe behavior without reaching inside. Tests live at seams, never against internals.
 
-**Test only at pre-agreed seams.** Before writing any test, write down the seams under test and the tests planned at each, one line per test: its name, the regression only it catches, and its cost when it crosses a process, database or network boundary. Confirm the list with the user. No test is written at an unconfirmed seam, and a test the loop turns up later goes on the list, with its line, before it is written. You can't test everything, so agreeing the seams up front is how testing effort lands on the critical paths and complex logic instead of every edge case.
+**Test only at pre-agreed seams.** Before writing any test, write down the seams under test and the tests planned at each, one line per test: its name, the regression only it catches, its owner search (where you looked for a test already red on that regression, and what you found: none, or the test it extends), and its cost when it crosses a process, database or network boundary. Confirm the list with the user. No test is written at an unconfirmed seam, and a test the loop turns up later goes on the list, with its line, before it is written. You can't test everything, so agreeing the seams up front is how testing effort lands on the critical paths and complex logic instead of every edge case.
 
 Ask: "What's the public interface, and which seams should we test?"
 
@@ -31,8 +31,9 @@ When the shape of that interface is itself in question (how deep the module is, 
 
 Each behaviour has one **owner** test, at the highest seam that shows it. Tests of its dependents assert only what the dependent adds. James Shore: "don't test all phases of the moon in your describeMoonPhase() tests, but do test them in your Moon tests."
 
-- **Name the regression.** Before adding a test, name the bug that would turn it red. When an existing test already goes red on that bug, extend that test or add a row to its table.
-- **Equivalence classes.** Cases cover one ordinary value, each value the code treats differently, and the boundaries between them: one refused input per guard.
+- **Name the regression.** Before adding a test, name the bug that would turn it red, then search for its owner: grep the tests at every seam the behaviour passes through, above and below this one, for the operation or a distinctive literal. When an existing test already goes red on that bug, extend that test or add a row to its table. Where two seams meet, follow the project's owner rules (its coding standards); where it has none, settle the owner with the user and record it there.
+- **Equivalence classes.** Cases cover one ordinary value, each value the code treats differently, and the boundaries between them: one refused input per guard. A list the types already fix gets one row per class the code treats differently, not one per member.
+- **Removed behaviour.** A change that removes a behaviour removes the tests and assertions that checked it, so none is left asserting about something that's gone.
 - **Cost.** A test that crosses a process, database or network boundary costs orders of magnitude more than an in-memory one, on every run. It covers only what that boundary alone shows, such as a query or a file format.
 
 ## Anti-patterns
@@ -44,5 +45,6 @@ Each behaviour has one **owner** test, at the highest seam that shows it. Tests 
 ## Rules of the loop
 
 - **Red before green.** Write the failing test first, then only enough code to pass it. Don't anticipate future tests or add speculative features.
+- **Green on first run is a finding.** A new test that passes the first time it runs is either checking a behaviour that already exists, whose owner is likely another test to extend, or one that can't go red. Find which before keeping it: search for the owner again, then break the code it guards, watch the test go red, and restore the code. The same goes for a test moved or written for existing code.
 - **One slice at a time.** One seam, one behaviour, one minimal implementation per cycle. The behaviour's test is a new owner, or a row in the owner it extends.
 - **Refactor on green, when it's due.** With the test green, look over the code the slice touched. When the slice left duplication, an unclear name, or a shape the next slice will fight, clean it up, keeping every test green. When it left the code clean, go straight to the next red. Review (the `code-review` skill) may turn up more to refactor afterwards, but that is optional.
