@@ -1,6 +1,6 @@
 ---
 name: nullables
-description: James Shore's Nullables pattern for testing without mocks. Use when writing or changing tests, adding code that touches the outside world (database, files, network, clock, environment), or replacing mocks.
+description: James Shore's Nullables pattern for testing without mocks. Use when writing or changing tests, adding code that touches the outside world (database, files, network, clock, environment, framework hooks), or replacing mocks.
 ---
 
 # Nullables
@@ -40,6 +40,7 @@ Code shapes and helper implementations (`ConfigurableResponses`, `OutputTracker`
 - **Application**: build the **subject under test** with its `create()`, passing Nulled dependencies (`Ledger.create({ store: ImportStore.createNull() })`), configure their responses, act, then assert on returned values, resulting state, or tracked output. `create()` is the production path, so the test exercises the wiring production runs, and a dependency missing its Null surfaces as a test reaching the outside world. A class's own `createNull()` serves the classes above it.
 - Every dependency in a test is the real class, Nulled at the infrastructure edge. The only stubbed code is third-party code, inside an Embedded Stub. Configurable Responses and Output Tracking do the work of mocking libraries, so modules and collaborators are never mocked or spied on (`jest.mock`, `vi.mock`, `vi.spyOn`).
 - **Callback props are output.** A UI component hands its result back through a callback prop, such as a form's `onSubmit` or server action. In a component test, a `vi.fn()` passed as that prop is the component's Output Tracking: assert on what it received (`toHaveBeenCalledWith`), and give it a return value to stand in for the answer.
+- **Framework-provided dependencies are Nulled at the framework's own seam.** A hook or injected service that reads from the framework, such as a router, the current request or a theme, has no Wrapper to Null, since the framework hands it in rather than the app calling out. Where the framework provides it through an injection point, such as a React context or a DI container, the test provides an Embedded Stub there, with Output Tracking for what the code asks of it (each navigation, each header set). The real component and the real hook run; only the third-party object beneath them is stubbed. The code stays where the design puts it, at a layer fast tests reach, rather than moving to one only a real framework mounts. When the injection point is one of the framework's internals, a single shared test helper imports it, so a framework upgrade that moves it breaks one line.
 - **Signature Shielding**: route repeated setup through a helper taking optional named options with defaults and returning an object, so tests survive signature changes:
 
   ```ts

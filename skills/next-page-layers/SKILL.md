@@ -27,7 +27,7 @@ The view is named for its route (`SavingsView` beside `savings/page.tsx`), isn't
 
 - Props are the data layer's results in their domain shape. The view calls pure helpers on them while it renders.
 - Server actions arrive as props, so a test can pass its own.
-- Router hooks (`useRouter`, `useSearchParams`, `usePathname`) need the App Router, which jsdom lacks. Read them in a small client wrapper and pass the values and callbacks into the view as props.
+- A client component that calls a router hook, such as one that polls with `router.refresh()`, stays in the view; its tests render it under a stand-in App Router (below).
 - Anything that imports `server-only` stays out of the view's imports; a view imports the data layer's types only.
 
 Test it with Vitest and React Testing Library in jsdom, passing fixture props. Most UI tests live here.
@@ -50,6 +50,52 @@ test("adding a bucket sends its name and target", async () => {
 });
 ```
 
+### Router hooks
+
+`useRouter`, `usePathname` and `useSearchParams` read React contexts the App Router provides, so in jsdom, with no App Router mounted, they throw. A view test provides those contexts itself, with a stand-in router that records each navigation as the view's tracked output: the real hook and the real component run, and only the router beneath them is a test object, a Nulled router in the `nullables` sense. One helper in the shared test fixtures does it:
+
+```tsx
+import {
+  AppRouterContext,
+  type AppRouterInstance,
+} from "next/dist/shared/lib/app-router-context.shared-runtime";
+
+// Renders inside a stand-in App Router that records each navigation.
+export function renderInRouter(ui: React.ReactNode) {
+  const navigations: string[] = [];
+  const router: AppRouterInstance = {
+    refresh: () => navigations.push("refresh"),
+    push: (href) => navigations.push(`push ${href}`),
+    replace: (href) => navigations.push(`replace ${href}`),
+    back: () => navigations.push("back"),
+    forward: () => navigations.push("forward"),
+    prefetch() {},
+    bfcacheId: "test",
+  };
+  render(<AppRouterContext.Provider value={router}>{ui}</AppRouterContext.Provider>);
+  return { navigations };
+}
+
+test("refreshes every 5 seconds while a Session is live", () => {
+  vi.useFakeTimers();
+  const { navigations } = renderInRouter(<HomeView sessions={[liveSession]} />);
+
+  act(() => vi.advanceTimersByTime(10_000));
+
+  expect(navigations).toEqual(["refresh", "refresh"]);
+});
+```
+
+`usePathname` and `useSearchParams` read `PathnameContext` and `SearchParamsContext` from `next/dist/shared/lib/hooks-client-context.shared-runtime`; the helper provides them the same way when a view needs them.
+
+These paths are Next's internals, not its public API, so they live in that one helper. Should Next move them, as it did once in 13.5, the import fails to compile there, and typing the stand-in as `AppRouterInstance` makes typecheck name any method a new Next version adds. Record the internal import in the project's decision log where it has one.
+
+The alternatives each lose something this keeps:
+
+- `vi.mock("next/navigation")` replaces the whole module, hoisted above the imports, so every other export from it vanishes with it, and the test passes whatever Next's router does.
+- Rendering the hook's component from `page.tsx`, beside the view, leaves the branch that decides whether it renders to browser tests alone, and nothing checks what it does.
+- A callback prop such as `refresh` can't cross from a server page to a client component, so it needs a client wrapper that still calls the hook, and the problem moves rather than goes.
+
 ### Setup
 
 - View and client-component tests run in jsdom, everything else in Node: two Vitest projects split by file, or `// @vitest-environment jsdom` atop each view test.
@@ -71,4 +117,5 @@ Playwright against a real Next.js server covers what only that server shows: rou
 | A rule, filter or permission | Data layer test, in Node |
 | Parsing a route param or a form | Plain function test |
 | What a state shows, what a form does | View test, in jsdom |
+| What a component does with the router: polling, navigating | View test, under a stand-in App Router |
 | A route, redirect, not-found page, stream, cookie or header | Browser test |
