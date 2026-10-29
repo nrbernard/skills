@@ -47,7 +47,7 @@ The feature's **promises file**, `promises.md` in the feature directory, carries
 
 **Blocked by:** <NN> (<title>) for each open ticket it builds on, or None (can start immediately)
 
-**Status:** ready-for-agent
+Status: ready-for-agent
 
 - [ ] An acceptance criterion: false today, true when the ticket lands
 ```

@@ -32,7 +32,7 @@ function rootOf(...written) {
     const line = blockedBy === null ? "" : `**Blocked by:** ${blockedBy}\n\n`;
     writeFileSync(
       join(dir, `${number}-a-ticket.md`),
-      `# ${number}: Ticket ${number} of ${feature}\n\n${line}**Status:** ${status}\n`,
+      `# ${number}: Ticket ${number} of ${feature}\n\n${line}Status: ${status}\n`,
     );
   }
   return root;

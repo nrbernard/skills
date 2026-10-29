@@ -1,5 +1,5 @@
 // Reads every ticket under .scratch/<feature>/issues/ from each file's H1,
-// **Status:** and **Blocked by:** lines. Ticket numbers restart in each
+// Status: and **Blocked by:** lines. Ticket numbers restart in each
 // feature, so a blocker written as a bare number is a ticket in the blocked
 // ticket's own feature, and one in another feature is written <feature>-NN.
 import { existsSync, readdirSync, readFileSync } from "node:fs";
@@ -62,7 +62,7 @@ export function readTickets(root = ".") {
         file,
         file,
       ];
-      const status = text.match(/^\*\*Status:\*\*\s*(.+)$/m)?.[1].trim() ?? "?";
+      const status = text.match(/^Status:\s*(.+)$/m)?.[1].trim() ?? "?";
       const blockedBy = text
         .match(/^\*\*Blocked by:\*\*[ \t]*(.*)$/m)?.[1]
         .trim();
