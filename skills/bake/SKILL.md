@@ -18,4 +18,4 @@ Once done, call the Skill tool with `test-audit` on the ticket's diff and fix wh
 
 Resolve the ticket the way the issue tracker closes work, unless it closes work through PRs.
 
-Commit your work to the current branch.
+Commit once, when the ticket is done: one commit to the current branch holding the work, its tests, and its resolution when you resolve it here, made with the repo's commit hooks running. A hook can run the whole suite, so each extra commit costs a full run.

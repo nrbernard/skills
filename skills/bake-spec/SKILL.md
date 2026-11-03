@@ -36,7 +36,7 @@ Communication to and from subagents should be sparse. Communicate primarily thro
 
 7. If the merge changes the **frontier**, settle the new frontier tickets' **shared seams** as in step 2, with each other and with bakers still running. Then kick off more **baker subagents** on them. This allows for maximum concurrency.
 
-8. Once every ticket is done, call the Skill tool with `code-review` on the integration branch. Fix all issues raised by the code review in a single **baker subagent**, building with `lettuce`.
+8. Once every ticket is done, call the Skill tool with `code-review` on the integration branch. Fix all issues raised by the code review in a single **baker subagent**, building with `lettuce` and committing once, when every fix is in, with the repo's commit hooks running.
 
 9. If a draft PR exists, mark it ready for review. Otherwise, report the integration branch.
 
