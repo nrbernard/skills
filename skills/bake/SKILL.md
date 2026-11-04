@@ -14,7 +14,7 @@ Run typechecking regularly, single test files regularly, and the full test suite
 
 Build the spec as written, leaving its text unchanged. Name any spec change the ticket or the build turns up in your report, for the user to decide.
 
-Once done, call the Skill tool with `test-audit` on the ticket's diff and fix what it finds, then use /code-review to review the work.
+Once done, call the Skill tool with `test-audit` on the ticket's diff and fix what it finds, then call the Skill tool with `code-review` to review the work, passing in its arguments that each reviewer runs on Sonnet (`model: "sonnet"`), since they check work that is already written.
 
 Resolve the ticket the way the issue tracker closes work, unless it closes work through PRs.
 

@@ -8,6 +8,8 @@ An audit reads tests against the project's own testing rules and keeps, for each
 
 Read the tests rather than mutation-testing them: finding redundant tests needs every test that kills each mutant, which reruns most of the suite per mutant and takes hours.
 
+Every subagent this skill dispatches runs on Sonnet (`model: "sonnet"`), since each works from a written brief: [auditor.md](auditor.md), [reconcile.md](reconcile.md) or `final.md`.
+
 ## Verdicts
 
 Each test, and each row of a table of cases, gets one:
