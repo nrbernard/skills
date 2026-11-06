@@ -2,7 +2,7 @@
 name: ask-in-browser
 description: Questions for the user as a browser form, in place of chat. Use for every grilling round, and for any other question that is a choice between options.
 metadata:
-  version: "0.2.1"
+  version: "0.2.2"
 ---
 
 The form server sits beside this file.
@@ -16,6 +16,8 @@ The form server sits beside this file.
    ```
 
    `facts`, `group`, `body` and `why` are optional. Options are lettered A, B, C in order. Every question has a `rec`: one letter, or an array of letters to let the user tick several. Backticks and `**bold**` render; HTML does not. Every count and every claim about how things stand today, in `facts` or a `why`, comes from a command already run.
+
+   Each question decides one thing, and its options are the answers to that one thing; a second dimension gets its own question. An option that reopens a settled decision (an ADR, a resolved ticket) names it in its `body` and states what reopening it costs, so the user can choose without first asking for the trade-offs.
 2. Tell the user the form is open, plus anything they need to know before answering.
 3. When the server exits, its output ends with one line per question, `Q1: A` or `Q2: A, C — note`. Carry on from the answers.
 
